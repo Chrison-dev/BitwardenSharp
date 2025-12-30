@@ -29,8 +29,12 @@ namespace Bitwarden.Cli
                         // Register platform-specific secret store
                         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                             services.AddSingleton<ISecretStore, DpapiSecretStore>();
-                        else
+                        if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX) ||
+                                RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
                             services.AddSingleton<ISecretStore, OsKeyringSecretStore>();
+
+                        if (!services.Any(s => s.ServiceType == typeof(ISecretStore)))
+                            throw new PlatformNotSupportedException("No supported secret store for this platform.");
                     }
 
                     // Register Config as instance-based singleton using DI

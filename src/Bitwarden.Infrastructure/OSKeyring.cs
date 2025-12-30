@@ -24,8 +24,7 @@ namespace Bitwarden.Infrastructure
                     CreateNoWindow = true,
                 };
 
-                using var p = Process.Start(psi);
-                if (p == null) throw new InvalidOperationException("secret-tool not available");
+                using var p = Process.Start(psi) ?? throw new InvalidOperationException("secret-tool not available");
                 p.StandardInput.Write(secret);
                 p.StandardInput.Close();
                 p.WaitForExit();
