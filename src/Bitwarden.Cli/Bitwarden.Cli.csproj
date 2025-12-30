@@ -1,0 +1,35 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+  <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="CommandLineParser" Version="2.9.1" />
+    <PackageReference Include="System.Security.Cryptography.ProtectedData" Version="7.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="7.0.0" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="7.0.0" />
+    <PackageReference Include="Serilog.AspNetCore" Version="7.0.0" />
+    <PackageReference Include="Serilog.Sinks.Console" Version="4.1.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Bitwarden.Application\Bitwarden.Application.csproj" />
+    <ProjectReference Include="..\Bitwarden.Infrastructure\Bitwarden.Infrastructure.csproj" />
+  </ItemGroup>
+
+  <!-- Exclude legacy/migrated files which now live in Application/Infrastructure -->
+  <ItemGroup>
+    <Compile Remove="BwRunner.cs" />
+    <Compile Remove="Config.cs" />
+    <Compile Remove="DpapiSecretStore.cs" />
+    <Compile Remove="InMemorySecretStore.cs" />
+    <Compile Remove="ISecretStore.cs" />
+    <Compile Remove="OSKeyring.cs" />
+    <Compile Remove="OsKeyringSecretStore.cs" />
+  </ItemGroup>
+
+</Project>
