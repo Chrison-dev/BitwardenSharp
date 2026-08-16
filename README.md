@@ -123,9 +123,22 @@ so a stray log line or exception message cannot leak a credential.
 dotnet run --project src/Presentation/Desktop
 ```
 
-Unlock screen, then a three-pane browser: the folder tree (rebuilt from Bitwarden's
+Avalonia 12. Unlock screen, then a three-pane browser: the folder tree (rebuilt from Bitwarden's
 slash-separated flat names), the item list, and a detail pane. Passwords are masked until
 revealed, and revealing is per-view — never persisted.
+
+Two rules the desktop host lives by, both learned the hard way:
+
+- **Never block the UI thread on a task.** The first service is resolved on that thread, where
+  Avalonia has installed a `SynchronizationContext`. Blocking there to await server start-up
+  deadlocked the app before it drew its window — the awaits needed the thread that was waiting
+  for them. `BwServeConnection` starts the server on first *awaited* use, and
+  `ShutdownRequested` cancels itself, awaits, then shuts down for real. There is no
+  `.GetAwaiter().GetResult()` anywhere, and a test enforces that resolution starts nothing.
+- **The child must die with us.** A `bw serve` orphaned by a crash keeps an unauthenticated port
+  onto an unlocked vault open indefinitely, so cleanup is hooked on both `ProcessExit` and
+  `PosixSignalRegistration` for SIGTERM/SIGINT/SIGHUP. `ProcessExit` alone was observed not to
+  land in time.
 
 Next iteration is the duplicate reviewer: left/right compare with per-property merge in either
 direction.

@@ -25,6 +25,16 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Rewritten from the pre-1.0 prototype, which returned process exit codes rather than data and had
   no domain model. That work is preserved on the `archive/v0-copilot` tag.
 
+### Fixed
+- Desktop app froze on launch. Server start-up was awaited with `GetAwaiter().GetResult()` from a
+  DI factory, which runs on the UI thread; the awaits inside start-up then needed the thread that
+  was blocked waiting for them. Start-up is lazy and asynchronous now, shutdown cancels-awaits-
+  reshuts rather than blocking, and a test asserts that resolving a service starts no process.
+- `bw serve` was left running after an abrupt exit, keeping an unauthenticated port onto an
+  unlocked vault open indefinitely. Cleanup now runs on POSIX signals as well as `ProcessExit`.
+- Several detail-pane sections bound `Count` (an int) to `IsVisible` (a bool), which Avalonia
+  reports as a binding error at runtime.
+
 ### Security
 - Secrets are never passed as process arguments: the session key travels in the child environment
   and the item payload for `bw edit` is piped to stdin. The prototype passed the master password

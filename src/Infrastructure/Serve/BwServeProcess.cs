@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using System.Net;
 using System.Net.Sockets;
+using System.Runtime.InteropServices;
 using Microsoft.Extensions.Logging;
 
 namespace BitwardenSharp.Infrastructure.Serve;
@@ -44,6 +45,8 @@ public sealed class BwServeProcess(BwServeOptions options, ILogger<BwServeProces
     : IAsyncDisposable
 {
     private Process? _process;
+    private EventHandler? _processExitHook;
+    private readonly List<PosixSignalRegistration> _signalHooks = [];
 
     public Uri BaseAddress { get; private set; } = null!;
 
@@ -72,6 +75,8 @@ public sealed class BwServeProcess(BwServeOptions options, ILogger<BwServeProces
 
         BaseAddress = new Uri($"http://{options.Hostname}:{port}/");
         logger?.LogInformation("Started bw serve on {BaseAddress} (pid {Pid})", BaseAddress, _process.Id);
+
+        RegisterCleanupHooks();
 
         await WaitUntilAnsweringAsync(cancellationToken);
     }
@@ -118,8 +123,61 @@ public sealed class BwServeProcess(BwServeOptions options, ILogger<BwServeProces
         return port;
     }
 
+    /// <summary>
+    /// Makes sure the child dies with us.
+    /// </summary>
+    /// <remarks>
+    /// A child is not reaped with its parent on Unix, so an app that exits without disposing — a
+    /// crash, a kill, a stopped debug session — would otherwise leave <c>bw serve</c> running
+    /// indefinitely with an unauthenticated port onto an unlocked vault.
+    ///
+    /// <see cref="AppDomain.ProcessExit"/> alone is not enough: on a signal the runtime gives
+    /// handlers a short budget and the kill was observed not to land. <see cref="PosixSignalRegistration"/>
+    /// runs first and synchronously, so the child is gone before the runtime begins tearing down.
+    /// SIGKILL remains uncoverable by anything.
+    /// </remarks>
+    private void RegisterCleanupHooks()
+    {
+        _processExitHook = (_, _) => KillNow();
+        AppDomain.CurrentDomain.ProcessExit += _processExitHook;
+
+        foreach (var signal in (PosixSignal[])[PosixSignal.SIGTERM, PosixSignal.SIGINT, PosixSignal.SIGHUP])
+        {
+            try
+            {
+                _signalHooks.Add(PosixSignalRegistration.Create(signal, _ => KillNow()));
+            }
+            catch (PlatformNotSupportedException)
+            {
+                // Not every signal exists on every platform; ProcessExit still covers the rest.
+            }
+        }
+    }
+
+    /// <summary>Synchronous kill, for the exit hooks where there is no time to await.</summary>
+    private void KillNow()
+    {
+        try
+        {
+            if (_process is { HasExited: false }) _process.Kill(entireProcessTree: true);
+        }
+        catch
+        {
+            // Exiting anyway; there is nothing useful to do with a failure here.
+        }
+    }
+
     public async ValueTask DisposeAsync()
     {
+        if (_processExitHook is not null)
+        {
+            AppDomain.CurrentDomain.ProcessExit -= _processExitHook;
+            _processExitHook = null;
+        }
+
+        foreach (var hook in _signalHooks) hook.Dispose();
+        _signalHooks.Clear();
+
         if (_process is null) return;
 
         try

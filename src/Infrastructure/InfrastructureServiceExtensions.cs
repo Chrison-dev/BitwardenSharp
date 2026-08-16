@@ -42,15 +42,10 @@ public static class InfrastructureServiceExtensions
         services.AddSingleton(options);
         services.AddSingleton<BwServeProcess>();
 
-        // The base address is not known until the server has picked a port, so the HttpClient is
-        // built after StartAsync rather than configured up front.
-        services.AddSingleton(provider =>
-        {
-            var server = provider.GetRequiredService<BwServeProcess>();
-            server.StartAsync().GetAwaiter().GetResult();
-            return new HttpClient { BaseAddress = server.BaseAddress, Timeout = TimeSpan.FromMinutes(2) };
-        });
-
+        // Registration must not start anything: the first service is resolved on the UI thread,
+        // and blocking there to await start-up deadlocks the app. BwServeConnection starts the
+        // server on first awaited use instead.
+        services.AddSingleton<BwServeConnection>();
         services.AddSingleton<BwServeVaultClient>();
         services.AddSingleton<IVaultClient>(p => p.GetRequiredService<BwServeVaultClient>());
         services.AddSingleton<IVaultSession>(p => p.GetRequiredService<BwServeVaultClient>());

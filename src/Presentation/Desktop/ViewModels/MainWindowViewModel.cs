@@ -39,9 +39,16 @@ public sealed partial class MainWindowViewModel : ViewModelBase
     }
 
     /// <summary>Locks the vault on the way out rather than leaving a live session behind.</summary>
-    public void OnShutdown()
+    public async Task ShutdownAsync()
     {
-        try { _session.LockAsync().GetAwaiter().GetResult(); }
-        catch { /* shutting down anyway; a failure to lock must not block exit */ }
+        try
+        {
+            await _session.LockAsync().WaitAsync(TimeSpan.FromSeconds(5));
+        }
+        catch
+        {
+            // Shutting down regardless. The bw serve child is killed on dispose and the session
+            // key dies with it, so a failed lock leaves nothing recoverable behind.
+        }
     }
 }

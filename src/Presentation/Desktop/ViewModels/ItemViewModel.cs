@@ -18,6 +18,15 @@ public sealed partial class ItemViewModel(VaultItem item) : ViewModelBase
     public IReadOnlyList<CustomField> Fields => Item.Fields;
     public IReadOnlyList<ItemAttachment> Attachments => Item.Attachments;
     public bool HasTotp => !string.IsNullOrWhiteSpace(Item.Login?.Totp);
+
+    // Bound directly to IsVisible. Binding `Uris.Count` there instead would hand an int to a
+    // bool property, which Avalonia reports as a binding error at runtime and silently leaves
+    // the section in whatever state it started in.
+    public bool HasUris => Item.Uris.Count > 0;
+    public bool HasFields => Item.Fields.Count > 0;
+    public bool HasAttachments => Item.Attachments.Count > 0;
+    public bool HasNotes => !string.IsNullOrWhiteSpace(Item.Notes);
+    public bool HasUsername => Username.Length > 0;
     public DateTimeOffset? Revised => Item.RevisionDate;
 
     public string TypeGlyph => Item.Type switch

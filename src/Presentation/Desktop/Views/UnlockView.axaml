@@ -16,7 +16,7 @@
       </StackPanel>
 
       <TextBox x:Name="PasswordBox"
-               Watermark="Master password"
+               PlaceholderText="Master password"
                PasswordChar="•"
                IsEnabled="{Binding IsReady}"
                Text="{Binding MasterPassword}">
@@ -32,8 +32,11 @@
               IsEnabled="{Binding IsReady}"
               Command="{Binding UnlockCommand}" />
 
-      <ProgressBar IsIndeterminate="True" Height="3"
-                   IsVisible="{Binding IsBusy}" />
+      <StackPanel Spacing="6" IsVisible="{Binding IsBusy}">
+        <ProgressBar IsIndeterminate="True" Height="3" />
+        <TextBlock Text="{Binding Status}" Opacity="0.6" FontSize="11"
+                   HorizontalAlignment="Center" />
+      </StackPanel>
 
       <TextBlock Text="{Binding Error}"
                  Foreground="{DynamicResource SystemFillColorCriticalBrush}"

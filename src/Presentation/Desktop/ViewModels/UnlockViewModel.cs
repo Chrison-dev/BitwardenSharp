@@ -19,12 +19,22 @@ public sealed partial class UnlockViewModel(IVaultSession session) : ViewModelBa
     [ObservableProperty] private bool _isBusy;
     [ObservableProperty] private bool _isReady;
 
+    /// <summary>
+    /// What we are waiting on. Starting <c>bw serve</c> takes a second or two, and a UI that
+    /// simply sits there during it reads as hung.
+    /// </summary>
+    [ObservableProperty] private string? _status;
+
     /// <summary>Reads who we would be unlocking as, so the screen can name the account.</summary>
     public async Task InitialiseAsync()
     {
+        IsBusy = true;
+        Status = "Starting the local Bitwarden API…";
         try
         {
+            // First call starts bw serve; everything after it is fast.
             var status = await session.GetStatusAsync();
+            Status = null;
             AccountEmail = status.UserEmail;
             ServerUrl = status.ServerUrl;
 
@@ -43,6 +53,11 @@ public sealed partial class UnlockViewModel(IVaultSession session) : ViewModelBa
         {
             Error = $"Could not reach the bw client: {ex.Message}";
         }
+        finally
+        {
+            IsBusy = false;
+            Status = null;
+        }
     }
 
     private bool CanUnlock => !IsBusy && MasterPassword.Length > 0;
@@ -52,6 +67,7 @@ public sealed partial class UnlockViewModel(IVaultSession session) : ViewModelBa
     {
         IsBusy = true;
         Error = null;
+        Status = "Unlocking…";
         try
         {
             var result = await session.UnlockAsync(MasterPassword);
@@ -70,6 +86,7 @@ public sealed partial class UnlockViewModel(IVaultSession session) : ViewModelBa
         finally
         {
             IsBusy = false;
+            Status = null;
         }
     }
 }

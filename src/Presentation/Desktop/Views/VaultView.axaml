@@ -12,7 +12,7 @@
       <Grid ColumnDefinitions="Auto,*,Auto,Auto">
         <TextBlock Grid.Column="0" Text="BitwardenSharp"
                    FontWeight="SemiBold" VerticalAlignment="Center" Margin="0,0,16,0" />
-        <TextBox Grid.Column="1" Watermark="Search name, username or URI"
+        <TextBox Grid.Column="1" PlaceholderText="Search name, username or URI"
                  Text="{Binding Search}" MaxWidth="460" HorizontalAlignment="Left" />
         <Button Grid.Column="2" Content="Refresh" Margin="8,0,0,0"
                 Command="{Binding RefreshCommand}" />
@@ -69,10 +69,10 @@
       <GridSplitter Grid.Column="3" Background="Transparent" />
 
       <!-- detail -->
-      <ScrollViewer Grid.Column="4" Margin="0,8,8,8">
+      <ScrollViewer Grid.Column="4" Margin="0,8,8,8"
+                    IsVisible="{Binding SelectedItem, Converter={x:Static ObjectConverters.IsNotNull}}">
         <StackPanel Spacing="14" DataContext="{Binding SelectedItem}"
-                    x:DataType="vm:ItemViewModel"
-                    IsVisible="{Binding $parent[ScrollViewer].DataContext, Converter={x:Static ObjectConverters.IsNotNull}}">
+                    x:DataType="vm:ItemViewModel">
 
           <StackPanel Spacing="2">
             <TextBlock Text="{Binding Name}" FontSize="20" FontWeight="SemiBold"
@@ -81,7 +81,7 @@
           </StackPanel>
 
           <StackPanel Spacing="4"
-                      IsVisible="{Binding Username, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
+                      IsVisible="{Binding HasUsername}">
             <TextBlock Text="USERNAME" FontSize="10" Opacity="0.5" />
             <SelectableTextBlock Text="{Binding Username}" FontFamily="monospace" />
           </StackPanel>
@@ -102,7 +102,7 @@
             <TextBlock Text="a second factor is stored on this item" Opacity="0.7" FontSize="12" />
           </StackPanel>
 
-          <StackPanel Spacing="4" IsVisible="{Binding Uris.Count}">
+          <StackPanel Spacing="4" IsVisible="{Binding HasUris}">
             <TextBlock Text="URIS" FontSize="10" Opacity="0.5" />
             <ItemsControl ItemsSource="{Binding Uris}">
               <ItemsControl.ItemTemplate>
@@ -114,7 +114,7 @@
             </ItemsControl>
           </StackPanel>
 
-          <StackPanel Spacing="4" IsVisible="{Binding Fields.Count}">
+          <StackPanel Spacing="4" IsVisible="{Binding HasFields}">
             <TextBlock Text="CUSTOM FIELDS" FontSize="10" Opacity="0.5" />
             <ItemsControl ItemsSource="{Binding Fields}">
               <ItemsControl.ItemTemplate>
@@ -129,7 +129,7 @@
             </ItemsControl>
           </StackPanel>
 
-          <StackPanel Spacing="4" IsVisible="{Binding Attachments.Count}">
+          <StackPanel Spacing="4" IsVisible="{Binding HasAttachments}">
             <TextBlock Text="ATTACHMENTS" FontSize="10" Opacity="0.5" />
             <ItemsControl ItemsSource="{Binding Attachments}">
               <ItemsControl.ItemTemplate>
@@ -141,7 +141,7 @@
           </StackPanel>
 
           <StackPanel Spacing="4"
-                      IsVisible="{Binding Notes, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
+                      IsVisible="{Binding HasNotes}">
             <TextBlock Text="NOTES" FontSize="10" Opacity="0.5" />
             <SelectableTextBlock Text="{Binding Notes}" TextWrapping="Wrap" FontSize="12" />
           </StackPanel>

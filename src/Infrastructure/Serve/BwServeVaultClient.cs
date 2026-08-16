@@ -61,7 +61,7 @@ public sealed class BwServeException(string message) : Exception(message);
 /// </para>
 /// </remarks>
 public sealed class BwServeVaultClient(
-    HttpClient http,
+    BwServeConnection connection,
     ILogger<BwServeVaultClient>? logger = null) : IVaultClient, IVaultSession
 {
     private static readonly JsonSerializerOptions Json = new()
@@ -92,6 +92,7 @@ public sealed class BwServeVaultClient(
     {
         if (string.IsNullOrEmpty(masterPassword)) return UnlockResult.Failure("Enter your master password.");
 
+        var http = await connection.GetClientAsync(cancellationToken);
         using var response = await http.PostAsJsonAsync(
             "unlock", new { password = masterPassword }, Json, cancellationToken);
 
@@ -111,6 +112,7 @@ public sealed class BwServeVaultClient(
 
     public async Task LockAsync(CancellationToken cancellationToken = default)
     {
+        var http = await connection.GetClientAsync(cancellationToken);
         using var response = await http.PostAsync("lock", content: null, cancellationToken);
         response.EnsureSuccessStatusCode();
         logger?.LogInformation("Vault locked");
@@ -120,6 +122,7 @@ public sealed class BwServeVaultClient(
 
     public async Task SyncAsync(CancellationToken cancellationToken = default)
     {
+        var http = await connection.GetClientAsync(cancellationToken);
         using var response = await http.PostAsync("sync", content: null, cancellationToken);
         await EnsureSucceededAsync(response, cancellationToken);
     }
@@ -151,6 +154,7 @@ public sealed class BwServeVaultClient(
         // name would be deleted from the vault.
         var wire = BwItemMapper.ApplyTo(item, await GetWireItemAsync(item.Id, cancellationToken));
 
+        var http = await connection.GetClientAsync(cancellationToken);
         using var response = await http.PutAsJsonAsync($"object/item/{item.Id}", wire, Json, cancellationToken);
         var envelope = await ReadEnvelopeAsync<BwItem>(response, cancellationToken);
         return BwItemMapper.ToDomain(envelope);
@@ -163,6 +167,7 @@ public sealed class BwServeVaultClient(
     {
         // The API soft-deletes to trash by default, matching the CLI.
         var path = permanent ? $"object/item/{id}?permanent=true" : $"object/item/{id}";
+        var http = await connection.GetClientAsync(cancellationToken);
         using var response = await http.DeleteAsync(path, cancellationToken);
         await EnsureSucceededAsync(response, cancellationToken);
         logger?.LogInformation(
@@ -176,6 +181,7 @@ public sealed class BwServeVaultClient(
 
     private async Task<T> GetAsync<T>(string path, CancellationToken cancellationToken)
     {
+        var http = await connection.GetClientAsync(cancellationToken);
         using var response = await http.GetAsync(path, cancellationToken);
         return await ReadEnvelopeAsync<T>(response, cancellationToken);
     }
