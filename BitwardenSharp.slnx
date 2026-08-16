@@ -1,0 +1,17 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Domain/BitwardenSharp.Domain.csproj" />
+    <Project Path="src/Application/BitwardenSharp.Application.csproj" />
+    <Project Path="src/Infrastructure/BitwardenSharp.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/src/Presentation/">
+    <Project Path="src/Presentation/Cli/BitwardenSharp.Cli.csproj" />
+    <Project Path="src/Presentation/Desktop/BitwardenSharp.Desktop.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Domain.Tests/BitwardenSharp.Domain.Tests.csproj" />
+    <Project Path="tests/Application.Tests/BitwardenSharp.Application.Tests.csproj" />
+    <Project Path="tests/Infrastructure.Tests/BitwardenSharp.Infrastructure.Tests.csproj" />
+    <Project Path="tests/Architecture.Tests/BitwardenSharp.Architecture.Tests.csproj" />
+  </Folder>
+</Solution>

@@ -1,0 +1,57 @@
+# Changelog
+
+All notable changes to this project are documented here.
+The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this project
+adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [Unreleased]
+
+### Added
+- Duplicate detection across five categories, with only same-site and same-brand/family groups
+  treated as mergeable.
+- Merge engine: survivor-first, verified before any deletion, soft deletes to trash.
+- `bwsharp scan` and `bwsharp merge` on Spectre.Console; dry run by default.
+- `bwsharp scan --from <file>` for read-only analysis of a saved `bw list items` dump.
+- Architecture tests enforcing the hexagon and keeping process execution inside Infrastructure.
+- Avalonia desktop host: unlock screen and a three-pane vault browser (folder tree, item list,
+  detail pane), with passwords masked until revealed.
+- `AddBitwardenServe()` — a second `IVaultClient` adapter over the local Vault Management API
+  from `bw serve`, on a random loopback port owned as a child process. Used by the desktop host,
+  where one long-lived server beats a Node start-up per call.
+- `IVaultSession` port for unlock/lock, separate from `IVaultClient` so only the desktop host
+  depends on taking a master password.
+
+### Changed
+- Rewritten from the pre-1.0 prototype, which returned process exit codes rather than data and had
+  no domain model. That work is preserved on the `archive/v0-copilot` tag.
+
+### Added
+- Full item model: cards, identities, secure notes and SSH keys alongside logins, plus password
+  history, per-cipher `key`, `reprompt` and collection ids. Card numbers, CVVs, SSH private keys
+  and historical passwords all redact in `ToString` like login passwords already did.
+- Folder create/rename/delete and drag-and-drop of items and folders, planned through
+  `FolderPaths` so a rename carries its subtree and self-nesting is refused before any write.
+- Website icons from Bitwarden's icon service, cached on disk, with a coloured-initial fallback.
+  Off by one flag; see the README on what a lookup discloses.
+
+### Added (continued)
+- Duplicate queue and three-pane merge editor in the desktop app. The queue separates groups whose
+  decisions are cosmetic from those with a real credential conflict; the editor handles groups of
+  any size, per-property choices, per-element collection inclusion, and merging into a member or
+  a new item.
+
+### Fixed
+- Desktop app froze on launch. Server start-up was awaited with `GetAwaiter().GetResult()` from a
+  DI factory, which runs on the UI thread; the awaits inside start-up then needed the thread that
+  was blocked waiting for them. Start-up is lazy and asynchronous now, shutdown cancels-awaits-
+  reshuts rather than blocking, and a test asserts that resolving a service starts no process.
+- `bw serve` was left running after an abrupt exit, keeping an unauthenticated port onto an
+  unlocked vault open indefinitely. Cleanup now runs on POSIX signals as well as `ProcessExit`.
+- Several detail-pane sections bound `Count` (an int) to `IsVisible` (a bool), which Avalonia
+  reports as a binding error at runtime.
+
+### Security
+- Secrets are never passed as process arguments: the session key travels in the child environment
+  and the item payload for `bw edit` is piped to stdin. The prototype passed the master password
+  on the command line, where `ps` exposes it to every local user.
+- Records holding credentials redact them in `ToString`.

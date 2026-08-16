@@ -1,0 +1,10 @@
+#!/usr/bin/env sh
+# Husky.NET-managed pre-commit guard. Sourcing husky.sh is optional (honors HUSKY=0
+# and re-execs under `sh -e`); the guard also runs standalone on a fresh clone
+# before `dotnet husky install` has regenerated _/.
+husky_sh="$(dirname -- "$0")/_/husky.sh"
+[ -f "$husky_sh" ] && . "$husky_sh"
+
+# GitHub's secret scanning and push protection are free for public repos only, and
+# this is a private repo on a free-tier org. This is the substitute.
+sh "$(dirname -- "$0")/scan-secrets.sh"

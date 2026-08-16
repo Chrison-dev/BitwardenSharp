@@ -1,0 +1,174 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="clr-namespace:BitwardenSharp.Desktop.ViewModels"
+             x:Class="BitwardenSharp.Desktop.Views.MergeEditorView"
+             x:DataType="vm:MergeEditorViewModel">
+
+  <Grid RowDefinitions="Auto,*,Auto">
+
+    <!-- ── header ──────────────────────────────────────────────────────── -->
+    <Border Grid.Row="0" Padding="12,10" BorderThickness="0,0,0,1"
+            BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}">
+      <Grid ColumnDefinitions="Auto,*,Auto,Auto">
+        <TextBlock Grid.Column="0" Text="{Binding GroupId}" FontFamily="monospace"
+                   Opacity="0.5" VerticalAlignment="Center" />
+        <TextBlock Grid.Column="1" Text="{Binding GroupKey}" Margin="12,0,0,0"
+                   VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
+        <CheckBox Grid.Column="2" Content="Show identical" IsChecked="{Binding ShowIdentical}" />
+        <CheckBox Grid.Column="3" Content="Reveal secrets" Margin="12,0,0,0"
+                  IsChecked="{Binding RevealSecrets}" />
+      </Grid>
+    </Border>
+
+    <!-- ── three panes ─────────────────────────────────────────────────── -->
+    <Grid Grid.Row="1" ColumnDefinitions="220,*,*">
+
+      <!-- member rail -->
+      <DockPanel Grid.Column="0" Margin="12">
+        <TextBlock DockPanel.Dock="Top" Text="MEMBERS" FontSize="10" Opacity="0.5" Margin="0,0,0,6" />
+        <ListBox ItemsSource="{Binding Members}" SelectedItem="{Binding SelectedMember}">
+          <ListBox.ItemTemplate>
+            <DataTemplate>
+              <StackPanel Margin="0,2">
+                <TextBlock Text="{Binding Name}" TextTrimming="CharacterEllipsis" />
+                <TextBlock Text="{Binding Login.Username}" FontSize="11" Opacity="0.55"
+                           TextTrimming="CharacterEllipsis" />
+              </StackPanel>
+            </DataTemplate>
+          </ListBox.ItemTemplate>
+        </ListBox>
+      </DockPanel>
+
+      <!-- compare pane -->
+      <DockPanel Grid.Column="1" Margin="0,12,12,12">
+        <Grid DockPanel.Dock="Top" ColumnDefinitions="*,Auto" Margin="0,0,0,6">
+          <TextBlock Grid.Column="0" Text="{Binding CompareTitle}" FontWeight="SemiBold"
+                     TextTrimming="CharacterEllipsis" VerticalAlignment="Center" />
+          <Button Grid.Column="1" Content="Take all →" FontSize="11"
+                  Command="{Binding TakeAllFromCompareCommand}" />
+        </Grid>
+
+        <ScrollViewer>
+          <ItemsControl ItemsSource="{Binding VisibleRows}">
+            <ItemsControl.ItemTemplate>
+              <DataTemplate x:DataType="vm:MergePropertyRow">
+                <Grid ColumnDefinitions="*,Auto" Margin="0,0,0,10">
+                  <StackPanel Grid.Column="0" Spacing="2">
+                    <TextBlock Text="{Binding Label}" FontSize="10" Opacity="0.5" />
+                    <SelectableTextBlock Text="{Binding CompareDisplay}" TextWrapping="Wrap"
+                                         FontFamily="monospace" FontSize="12" />
+                  </StackPanel>
+                  <!-- only offered when it would actually change something -->
+                  <Button Grid.Column="1" Content="→" Margin="8,0,0,0" VerticalAlignment="Bottom"
+                          ToolTip.Tip="Use this value"
+                          IsVisible="{Binding DiffersFromCompare}"
+                          Command="{Binding TakeFromCompareCommand}" />
+                </Grid>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+        </ScrollViewer>
+      </DockPanel>
+
+      <!-- result pane -->
+      <DockPanel Grid.Column="2" Margin="0,12,12,12">
+        <TextBlock DockPanel.Dock="Top" Text="{Binding ResultTitle}" FontWeight="SemiBold"
+                   Margin="0,0,0,6" TextTrimming="CharacterEllipsis" />
+
+        <ScrollViewer>
+          <StackPanel Spacing="14">
+
+            <ItemsControl ItemsSource="{Binding VisibleRows}">
+              <ItemsControl.ItemTemplate>
+                <DataTemplate x:DataType="vm:MergePropertyRow">
+                  <StackPanel Spacing="2" Margin="0,0,0,10">
+                    <Grid ColumnDefinitions="Auto,*">
+                      <TextBlock Grid.Column="0" Text="{Binding Label}" FontSize="10" Opacity="0.5" />
+                      <TextBlock Grid.Column="1" Text="edited" FontSize="10" Margin="6,0,0,0"
+                                 Foreground="{DynamicResource SystemFillColorCautionBrush}"
+                                 IsVisible="{Binding IsEdited}" />
+                    </Grid>
+                    <!-- freely editable: the result may be a value neither member had -->
+                    <TextBox Text="{Binding ResultValue}" FontFamily="monospace" FontSize="12"
+                             AcceptsReturn="False" IsVisible="{Binding !IsSecret}" />
+                    <TextBox Text="{Binding ResultValue}" FontFamily="monospace" FontSize="12"
+                             PasswordChar="•" IsVisible="{Binding IsSecret}"
+                             RevealPassword="{Binding Reveal}" />
+                  </StackPanel>
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+
+            <StackPanel Spacing="4">
+              <TextBlock Text="URIS" FontSize="10" Opacity="0.5" />
+              <ItemsControl ItemsSource="{Binding Uris}">
+                <ItemsControl.ItemTemplate>
+                  <DataTemplate x:DataType="vm:MergeElementRow">
+                    <CheckBox IsChecked="{Binding IsIncluded}" Margin="0,1">
+                      <StackPanel>
+                        <TextBlock Text="{Binding Text}" FontSize="12" TextWrapping="Wrap" />
+                        <TextBlock Text="{Binding Detail}" FontSize="10" Opacity="0.45" />
+                      </StackPanel>
+                    </CheckBox>
+                  </DataTemplate>
+                </ItemsControl.ItemTemplate>
+              </ItemsControl>
+            </StackPanel>
+
+            <StackPanel Spacing="4" IsVisible="{Binding HasFields}">
+              <TextBlock Text="CUSTOM FIELDS" FontSize="10" Opacity="0.5" />
+              <ItemsControl ItemsSource="{Binding Fields}">
+                <ItemsControl.ItemTemplate>
+                  <DataTemplate x:DataType="vm:MergeElementRow">
+                    <CheckBox IsChecked="{Binding IsIncluded}" Margin="0,1">
+                      <StackPanel>
+                        <TextBlock Text="{Binding Text}" FontSize="12" />
+                        <TextBlock Text="{Binding Detail}" FontSize="10" Opacity="0.45" />
+                      </StackPanel>
+                    </CheckBox>
+                  </DataTemplate>
+                </ItemsControl.ItemTemplate>
+              </ItemsControl>
+            </StackPanel>
+
+            <!-- what the result becomes -->
+            <StackPanel Spacing="4">
+              <TextBlock Text="WRITE THE RESULT TO" FontSize="10" Opacity="0.5" />
+              <ItemsControl ItemsSource="{Binding Targets}">
+                <ItemsControl.ItemTemplate>
+                  <DataTemplate x:DataType="vm:MergeTargetOption">
+                    <RadioButton GroupName="MergeTarget" Margin="0,2"
+                                 IsEnabled="{Binding IsEnabled}"
+                                 IsChecked="{Binding IsChosen}"
+                                 Command="{Binding $parent[ItemsControl].((vm:MergeEditorViewModel)DataContext).ChooseTargetCommand}"
+                                 CommandParameter="{Binding}">
+                      <StackPanel>
+                        <TextBlock Text="{Binding Label}" FontSize="12" />
+                        <TextBlock Text="{Binding Detail}" FontSize="10" Opacity="0.5"
+                                   TextWrapping="Wrap" />
+                      </StackPanel>
+                    </RadioButton>
+                  </DataTemplate>
+                </ItemsControl.ItemTemplate>
+              </ItemsControl>
+            </StackPanel>
+          </StackPanel>
+        </ScrollViewer>
+      </DockPanel>
+    </Grid>
+
+    <!-- ── footer ──────────────────────────────────────────────────────── -->
+    <Border Grid.Row="2" Padding="12,10" BorderThickness="0,1,0,0"
+            BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}">
+      <Grid ColumnDefinitions="Auto,*,Auto,Auto">
+        <Button Grid.Column="0" Content="Reset to default" Command="{Binding ResetCommand}" />
+        <TextBlock Grid.Column="1" Margin="16,0,0,0" VerticalAlignment="Center" FontSize="11"
+                   Opacity="0.6" TextWrapping="Wrap"
+                   Text="Deleted items go to Bitwarden's trash and stay restorable for 30 days. A replaced password is kept in the item's password history." />
+        <Button Grid.Column="2" Content="Cancel" Command="{Binding CancelCommand}" />
+        <Button Grid.Column="3" Content="Merge" Classes="accent" Margin="8,0,0,0"
+                Command="{Binding CommitCommand}" />
+      </Grid>
+    </Border>
+  </Grid>
+</UserControl>

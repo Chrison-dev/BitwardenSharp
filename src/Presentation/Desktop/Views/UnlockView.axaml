@@ -1,0 +1,50 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="clr-namespace:BitwardenSharp.Desktop.ViewModels"
+             x:Class="BitwardenSharp.Desktop.Views.UnlockView"
+             x:DataType="vm:UnlockViewModel">
+
+  <Border Padding="48">
+    <StackPanel Width="380" Spacing="16"
+                HorizontalAlignment="Center" VerticalAlignment="Center">
+
+      <TextBlock Text="BitwardenSharp" FontSize="26" FontWeight="SemiBold" />
+
+      <StackPanel Spacing="2">
+        <TextBlock Text="{Binding AccountEmail}" Opacity="0.85" />
+        <TextBlock Text="{Binding ServerUrl}" Opacity="0.5" FontSize="12" />
+      </StackPanel>
+
+      <TextBox x:Name="PasswordBox"
+               PlaceholderText="Master password"
+               PasswordChar="•"
+               IsEnabled="{Binding IsReady}"
+               Text="{Binding MasterPassword}">
+        <TextBox.KeyBindings>
+          <KeyBinding Gesture="Enter" Command="{Binding UnlockCommand}" />
+        </TextBox.KeyBindings>
+      </TextBox>
+
+      <Button Content="Unlock"
+              HorizontalAlignment="Stretch"
+              HorizontalContentAlignment="Center"
+              Classes="accent"
+              IsEnabled="{Binding IsReady}"
+              Command="{Binding UnlockCommand}" />
+
+      <StackPanel Spacing="6" IsVisible="{Binding IsBusy}">
+        <ProgressBar IsIndeterminate="True" Height="3" />
+        <TextBlock Text="{Binding Status}" Opacity="0.6" FontSize="11"
+                   HorizontalAlignment="Center" />
+      </StackPanel>
+
+      <TextBlock Text="{Binding Error}"
+                 Foreground="{DynamicResource SystemFillColorCriticalBrush}"
+                 TextWrapping="Wrap"
+                 IsVisible="{Binding Error, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+
+      <TextBlock TextWrapping="Wrap" Opacity="0.5" FontSize="11"
+                 Text="Your master password is passed to the bw client through its environment, never as a command-line argument, and is discarded as soon as the vault unlocks." />
+    </StackPanel>
+  </Border>
+</UserControl>

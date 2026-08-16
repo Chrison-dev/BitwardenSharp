@@ -1,0 +1,6 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <Description>Vault model for BitwardenSharp — items, logins, URIs, folders and the duplicate-analysis value types. Depends on nothing.</Description>
+    <PackageTags>bitwarden;vault;password-manager</PackageTags>
+  </PropertyGroup>
+</Project>
