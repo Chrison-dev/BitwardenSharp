@@ -29,6 +29,21 @@ public partial class VaultView : UserControl
     private static readonly DataFormat<FolderNode> FolderFormat =
         DataFormat.CreateInProcessFormat<FolderNode>("bitwardensharp.folder");
 
+    /// <summary>
+    /// A neutral label put on the system pasteboard alongside the in-process payload.
+    /// </summary>
+    /// <remarks>
+    /// macOS requires at least one pasteboard item per drag image and aborts the process
+    /// otherwise — an in-process format alone leaves the pasteboard empty, and AppKit raises
+    /// NSGenericException ("0 items on the pasteboard, but 1 drag images") which takes the whole
+    /// app down with SIGABRT.
+    ///
+    /// The text is deliberately a fixed marker rather than the item's name. It is the only part
+    /// of the drag that another application can see, and an item name can itself be sensitive —
+    /// dropping a vault row onto a text editor should reveal nothing.
+    /// </remarks>
+    private const string PasteboardMarker = "BitwardenSharp item";
+
     private PointerPressedEventArgs? _pressed;
     private Point _origin;
 
@@ -84,18 +99,25 @@ public partial class VaultView : UserControl
         var pressed = _pressed;
         _pressed = null;
 
-        var transfer = new DataTransfer();
+        DataTransferItem payload;
         switch (source)
         {
             case ItemViewModel item:
-                transfer.Add(DataTransferItem.Create(ItemIdsFormat, new[] { item.Id }));
+                payload = DataTransferItem.Create(ItemIdsFormat, new[] { item.Id });
                 break;
             case FolderNode { IsRealFolder: true } folder:
-                transfer.Add(DataTransferItem.Create(FolderFormat, folder));
+                payload = DataTransferItem.Create(FolderFormat, folder);
                 break;
             default:
                 return;
         }
+
+        // The real payload rides the in-process format; this only exists so the platform has a
+        // pasteboard item to attach the drag image to. See PasteboardMarker.
+        payload.SetText(PasteboardMarker);
+
+        var transfer = new DataTransfer();
+        transfer.Add(payload);
 
         try
         {
