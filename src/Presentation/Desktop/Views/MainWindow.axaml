@@ -1,0 +1,10 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="clr-namespace:BitwardenSharp.Desktop.ViewModels"
+        x:Class="BitwardenSharp.Desktop.Views.MainWindow"
+        x:DataType="vm:MainWindowViewModel"
+        Title="BitwardenSharp"
+        Width="1180" Height="760"
+        MinWidth="820" MinHeight="520">
+  <ContentControl Content="{Binding Current}" />
+</Window>

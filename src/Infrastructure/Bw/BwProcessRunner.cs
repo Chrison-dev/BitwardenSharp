@@ -49,9 +49,10 @@ public sealed class BwProcessRunner(BwCliOptions options, ILogger<BwProcessRunne
     public async Task<string> RunAsync(
         IEnumerable<string> arguments,
         string? standardInput = null,
+        IReadOnlyDictionary<string, string>? environment = null,
         CancellationToken cancellationToken = default)
     {
-        var result = await TryRunAsync(arguments, standardInput, cancellationToken);
+        var result = await TryRunAsync(arguments, standardInput, environment, cancellationToken);
         if (!result.Succeeded) throw new BwCommandException(DescribeSafely(arguments), result);
         return result.StandardOutput;
     }
@@ -60,6 +61,7 @@ public sealed class BwProcessRunner(BwCliOptions options, ILogger<BwProcessRunne
     public async Task<BwResult> TryRunAsync(
         IEnumerable<string> arguments,
         string? standardInput = null,
+        IReadOnlyDictionary<string, string>? environment = null,
         CancellationToken cancellationToken = default)
     {
         var args = arguments.ToList();
@@ -83,6 +85,11 @@ public sealed class BwProcessRunner(BwCliOptions options, ILogger<BwProcessRunne
         // bw asks for input on a TTY when it wants a password. Nothing here should ever reach
         // that state, and if it does we want a clean failure rather than a hung process.
         startInfo.Environment["BW_NOINTERACTION"] = "true";
+
+        // Caller-supplied values -- currently the master password for `unlock --passwordenv`.
+        // Set on the child only; this process's own environment is never touched.
+        if (environment is not null)
+            foreach (var (name, value) in environment) startInfo.Environment[name] = value;
 
         logger?.LogDebug("Running bw {Arguments}", DescribeSafely(args));
 

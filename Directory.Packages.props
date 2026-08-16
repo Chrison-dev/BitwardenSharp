@@ -16,6 +16,17 @@
     <PackageVersion Include="Spectre.Console.Cli" Version="0.55.0" />
   </ItemGroup>
 
+  <ItemGroup Label="Presentation (Desktop)">
+    <!-- Avalonia 11.3 rather than 12.x: the 12 line is stable but Avalonia.Diagnostics and much
+         of the ecosystem still track 11, and DevTools is worth more here than being current. -->
+    <PackageVersion Include="Avalonia"                Version="11.3.20" />
+    <PackageVersion Include="Avalonia.Desktop"        Version="11.3.20" />
+    <PackageVersion Include="Avalonia.Themes.Fluent"  Version="11.3.20" />
+    <PackageVersion Include="Avalonia.Fonts.Inter"    Version="11.3.20" />
+    <PackageVersion Include="Avalonia.Diagnostics"    Version="11.3.20" />
+    <PackageVersion Include="CommunityToolkit.Mvvm"   Version="8.4.2" />
+  </ItemGroup>
+
   <ItemGroup Label="Testing">
     <PackageVersion Include="Microsoft.NET.Test.Sdk"    Version="18.8.1" />
     <PackageVersion Include="xunit.v3"                  Version="3.2.2" />

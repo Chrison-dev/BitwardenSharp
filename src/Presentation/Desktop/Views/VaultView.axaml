@@ -1,0 +1,168 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="clr-namespace:BitwardenSharp.Desktop.ViewModels"
+             x:Class="BitwardenSharp.Desktop.Views.VaultView"
+             x:DataType="vm:VaultViewModel">
+
+  <Grid RowDefinitions="Auto,*,Auto">
+
+    <!-- ── toolbar ─────────────────────────────────────────────────────── -->
+    <Border Grid.Row="0" Padding="12,10" BorderThickness="0,0,0,1"
+            BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}">
+      <Grid ColumnDefinitions="Auto,*,Auto,Auto">
+        <TextBlock Grid.Column="0" Text="BitwardenSharp"
+                   FontWeight="SemiBold" VerticalAlignment="Center" Margin="0,0,16,0" />
+        <TextBox Grid.Column="1" Watermark="Search name, username or URI"
+                 Text="{Binding Search}" MaxWidth="460" HorizontalAlignment="Left" />
+        <Button Grid.Column="2" Content="Refresh" Margin="8,0,0,0"
+                Command="{Binding RefreshCommand}" />
+        <Button Grid.Column="3" Content="Lock" Margin="8,0,0,0"
+                Command="{Binding LockCommand}" />
+      </Grid>
+    </Border>
+
+    <!-- ── three panes ─────────────────────────────────────────────────── -->
+    <Grid Grid.Row="1" ColumnDefinitions="260,4,320,4,*">
+
+      <!-- folders -->
+      <DockPanel Grid.Column="0" Margin="8">
+        <Button DockPanel.Dock="Top" Content="All items"
+                HorizontalAlignment="Stretch" HorizontalContentAlignment="Left"
+                Command="{Binding ClearFolderCommand}" Margin="0,0,0,6" />
+        <TreeView ItemsSource="{Binding Folders}"
+                  SelectedItem="{Binding SelectedFolder}">
+          <TreeView.ItemTemplate>
+            <TreeDataTemplate ItemsSource="{Binding Children}" x:DataType="vm:FolderNode">
+              <TextBlock Text="{Binding Label}" />
+            </TreeDataTemplate>
+          </TreeView.ItemTemplate>
+        </TreeView>
+      </DockPanel>
+
+      <GridSplitter Grid.Column="1" Background="Transparent" />
+
+      <!-- item list -->
+      <DockPanel Grid.Column="2" Margin="0,8,8,8">
+        <TextBlock DockPanel.Dock="Top" Margin="4,0,0,6" Opacity="0.6" FontSize="12">
+          <Run Text="{Binding FilterDescription}" />
+          <Run Text=" — " />
+          <Run Text="{Binding Items.Count}" />
+          <Run Text=" shown" />
+        </TextBlock>
+        <ListBox ItemsSource="{Binding Items}" SelectedItem="{Binding SelectedItem}">
+          <ListBox.ItemTemplate>
+            <DataTemplate x:DataType="vm:ItemViewModel">
+              <Grid ColumnDefinitions="Auto,*" Margin="0,3">
+                <TextBlock Grid.Column="0" Text="{Binding TypeGlyph}" Margin="0,0,8,0"
+                           VerticalAlignment="Center" />
+                <StackPanel Grid.Column="1">
+                  <TextBlock Text="{Binding Name}" TextTrimming="CharacterEllipsis" />
+                  <TextBlock Text="{Binding Subtitle}" Opacity="0.55" FontSize="11"
+                             TextTrimming="CharacterEllipsis" />
+                </StackPanel>
+              </Grid>
+            </DataTemplate>
+          </ListBox.ItemTemplate>
+        </ListBox>
+      </DockPanel>
+
+      <GridSplitter Grid.Column="3" Background="Transparent" />
+
+      <!-- detail -->
+      <ScrollViewer Grid.Column="4" Margin="0,8,8,8">
+        <StackPanel Spacing="14" DataContext="{Binding SelectedItem}"
+                    x:DataType="vm:ItemViewModel"
+                    IsVisible="{Binding $parent[ScrollViewer].DataContext, Converter={x:Static ObjectConverters.IsNotNull}}">
+
+          <StackPanel Spacing="2">
+            <TextBlock Text="{Binding Name}" FontSize="20" FontWeight="SemiBold"
+                       TextWrapping="Wrap" />
+            <TextBlock Text="{Binding Type}" Opacity="0.5" FontSize="12" />
+          </StackPanel>
+
+          <StackPanel Spacing="4"
+                      IsVisible="{Binding Username, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
+            <TextBlock Text="USERNAME" FontSize="10" Opacity="0.5" />
+            <SelectableTextBlock Text="{Binding Username}" FontFamily="monospace" />
+          </StackPanel>
+
+          <StackPanel Spacing="4">
+            <TextBlock Text="PASSWORD" FontSize="10" Opacity="0.5" />
+            <Grid ColumnDefinitions="*,Auto">
+              <SelectableTextBlock Grid.Column="0" Text="{Binding PasswordDisplay}"
+                                   FontFamily="monospace" VerticalAlignment="Center"
+                                   TextWrapping="Wrap" />
+              <ToggleButton Grid.Column="1" Content="Reveal" Margin="8,0,0,0"
+                            IsChecked="{Binding IsPasswordVisible}" />
+            </Grid>
+          </StackPanel>
+
+          <StackPanel Spacing="4" IsVisible="{Binding HasTotp}">
+            <TextBlock Text="TOTP" FontSize="10" Opacity="0.5" />
+            <TextBlock Text="a second factor is stored on this item" Opacity="0.7" FontSize="12" />
+          </StackPanel>
+
+          <StackPanel Spacing="4" IsVisible="{Binding Uris.Count}">
+            <TextBlock Text="URIS" FontSize="10" Opacity="0.5" />
+            <ItemsControl ItemsSource="{Binding Uris}">
+              <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                  <SelectableTextBlock Text="{Binding Uri}" FontSize="12"
+                                       TextWrapping="Wrap" Margin="0,1" />
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+          </StackPanel>
+
+          <StackPanel Spacing="4" IsVisible="{Binding Fields.Count}">
+            <TextBlock Text="CUSTOM FIELDS" FontSize="10" Opacity="0.5" />
+            <ItemsControl ItemsSource="{Binding Fields}">
+              <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                  <Grid ColumnDefinitions="160,*" Margin="0,1">
+                    <TextBlock Grid.Column="0" Text="{Binding Name}" Opacity="0.7" FontSize="12" />
+                    <SelectableTextBlock Grid.Column="1" Text="{Binding Value}" FontSize="12"
+                                         TextWrapping="Wrap" />
+                  </Grid>
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+          </StackPanel>
+
+          <StackPanel Spacing="4" IsVisible="{Binding Attachments.Count}">
+            <TextBlock Text="ATTACHMENTS" FontSize="10" Opacity="0.5" />
+            <ItemsControl ItemsSource="{Binding Attachments}">
+              <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                  <TextBlock Text="{Binding FileName}" FontSize="12" />
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+          </StackPanel>
+
+          <StackPanel Spacing="4"
+                      IsVisible="{Binding Notes, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
+            <TextBlock Text="NOTES" FontSize="10" Opacity="0.5" />
+            <SelectableTextBlock Text="{Binding Notes}" TextWrapping="Wrap" FontSize="12" />
+          </StackPanel>
+
+          <TextBlock Opacity="0.4" FontSize="11">
+            <Run Text="last changed " />
+            <Run Text="{Binding Revised}" />
+          </TextBlock>
+        </StackPanel>
+      </ScrollViewer>
+    </Grid>
+
+    <!-- ── status bar ──────────────────────────────────────────────────── -->
+    <Border Grid.Row="2" Padding="12,6" BorderThickness="0,1,0,0"
+            BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}">
+      <Grid ColumnDefinitions="*,Auto">
+        <TextBlock Grid.Column="0" Text="{Binding StatusLine}" Opacity="0.6" FontSize="11"
+                   VerticalAlignment="Center" />
+        <ProgressBar Grid.Column="1" Width="120" Height="3" IsIndeterminate="True"
+                     IsVisible="{Binding IsBusy}" />
+      </Grid>
+    </Border>
+  </Grid>
+</UserControl>

@@ -66,11 +66,32 @@ An onion, with dependencies pointing inward only — enforced by tests in
 `tests/Architecture.Tests`, not by convention.
 
 ```
-src/Domain           the vault model, URI/eTLD+1 reduction, duplicate value types. Depends on nothing.
-src/Application      duplicate detection, survivor selection, merge planning. Owns the IVaultClient port.
-src/Infrastructure   the adapter that drives `bw`, plus the wire contracts.
-src/Presentation/Cli the `bwsharp` tool, on Spectre.Console.
+src/Domain               the vault model, URI/eTLD+1 reduction, duplicate value types. Depends on nothing.
+src/Application          duplicate detection, survivor selection, merge planning. Owns the ports.
+src/Infrastructure       two adapters onto `bw`, plus the wire contracts.
+src/Presentation/Cli     the `bwsharp` tool, on Spectre.Console.
+src/Presentation/Desktop the GUI, on Avalonia.
 ```
+
+### Two transports
+
+Both implement the same `IVaultClient` port, and each host picks what suits it:
+
+| | `AddBitwardenCli()` | `AddBitwardenServe()` |
+|---|---|---|
+| How | one `bw` process per call | one long-lived `bw serve`, HTTP for everything |
+| Cost | ~0.5s Node start-up **per call** | ~1.5s once |
+| Exposure | none | an **unauthenticated** local port for its lifetime |
+| Used by | the CLI — one-shot, so no port is worth opening | the desktop app — outlives every call |
+
+The Vault Management API has no authentication of any kind: anything that can reach the port
+reads the whole vault while it is unlocked. The mitigations are structural — loopback only, a
+random ephemeral port rather than the well-known 8087, spawned as a child process and killed on
+dispose, so the window is exactly the app's lifetime.
+
+One shape to know about if you extend the serve adapter: `/status` nests its payload under
+`data.template`, while every other endpoint puts it directly in `data`. The envelope is not
+uniform.
 
 ### Why it wraps `bw` rather than replacing it
 
@@ -95,6 +116,19 @@ Two rules hold throughout, because process arguments are world-readable via `ps`
 
 `LoginDetails` and `CustomField` override the compiler-generated record `ToString` to redact,
 so a stray log line or exception message cannot leak a credential.
+
+## Desktop app
+
+```
+dotnet run --project src/Presentation/Desktop
+```
+
+Unlock screen, then a three-pane browser: the folder tree (rebuilt from Bitwarden's
+slash-separated flat names), the item list, and a detail pane. Passwords are masked until
+revealed, and revealing is per-view — never persisted.
+
+Next iteration is the duplicate reviewer: left/right compare with per-property merge in either
+direction.
 
 ## Building
 

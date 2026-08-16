@@ -13,6 +13,13 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - `bwsharp scan` and `bwsharp merge` on Spectre.Console; dry run by default.
 - `bwsharp scan --from <file>` for read-only analysis of a saved `bw list items` dump.
 - Architecture tests enforcing the hexagon and keeping process execution inside Infrastructure.
+- Avalonia desktop host: unlock screen and a three-pane vault browser (folder tree, item list,
+  detail pane), with passwords masked until revealed.
+- `AddBitwardenServe()` — a second `IVaultClient` adapter over the local Vault Management API
+  from `bw serve`, on a random loopback port owned as a child process. Used by the desktop host,
+  where one long-lived server beats a Node start-up per call.
+- `IVaultSession` port for unlock/lock, separate from `IVaultClient` so only the desktop host
+  depends on taking a master password.
 
 ### Changed
 - Rewritten from the pre-1.0 prototype, which returned process exit codes rather than data and had

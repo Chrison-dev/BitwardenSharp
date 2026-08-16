@@ -15,7 +15,8 @@ public class HexagonalArchitectureSpecs
             typeof(Domain.Vault.VaultItem).Assembly,
             typeof(Application.ApplicationServiceExtensions).Assembly,
             typeof(Infrastructure.InfrastructureServiceExtensions).Assembly,
-            typeof(Cli.Commands.ScanCommand).Assembly)
+            typeof(Cli.Commands.ScanCommand).Assembly,
+            typeof(Desktop.ViewModels.VaultViewModel).Assembly)
         .Build();
 
     [Fact]
@@ -23,7 +24,7 @@ public class HexagonalArchitectureSpecs
     {
         Types().That().ResideInNamespaceMatching(@"BitwardenSharp\.Domain")
             .Should().NotDependOnAnyTypesThat()
-            .ResideInNamespaceMatching(@"BitwardenSharp\.(Application|Infrastructure|Cli)")
+            .ResideInNamespaceMatching(@"BitwardenSharp\.(Application|Infrastructure|Cli|Desktop)")
             .Because("Domain is the core of the hexagon and must depend on nothing else.")
             .Check(Architecture);
     }
@@ -33,7 +34,7 @@ public class HexagonalArchitectureSpecs
     {
         Types().That().ResideInNamespaceMatching(@"BitwardenSharp\.Application")
             .Should().NotDependOnAnyTypesThat()
-            .ResideInNamespaceMatching(@"BitwardenSharp\.(Infrastructure|Cli)")
+            .ResideInNamespaceMatching(@"BitwardenSharp\.(Infrastructure|Cli|Desktop)")
             .Because("Application owns the ports; adapters depend on it, never the reverse.")
             .Check(Architecture);
     }
@@ -43,7 +44,7 @@ public class HexagonalArchitectureSpecs
     {
         Types().That().ResideInNamespaceMatching(@"BitwardenSharp\.Infrastructure")
             .Should().NotDependOnAnyTypesThat()
-            .ResideInNamespaceMatching(@"BitwardenSharp\.Cli")
+            .ResideInNamespaceMatching(@"BitwardenSharp\.(Cli|Desktop)")
             .Because("Infrastructure implements ports; it must not reach into a presentation host.")
             .Check(Architecture);
     }
