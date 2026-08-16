@@ -416,3 +416,22 @@ FodyWeavers.xsd
 *.msix
 *.msm
 *.msp
+
+# ── Vault data — never commit ────────────────────────────────────────────────
+# A `bw list items` dump is the entire vault in PLAINTEXT: every password, TOTP
+# seed and note. One careless `git add -A` publishes the lot, and git history
+# keeps it even after a later delete. The pre-commit hook in .husky/ is the
+# active guard; these patterns are the passive one.
+items.json
+folders.json
+*vault-dump*.json
+*vault-export*.json
+bw-export*.json
+*.bitwarden.json
+REVIEW.md
+report.json
+merge-log.json
+
+# Session key / master password must never reach disk in this repo
+.bw-session
+secrets.env
