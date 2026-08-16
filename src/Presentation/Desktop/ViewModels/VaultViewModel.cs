@@ -16,6 +16,7 @@ public sealed partial class VaultViewModel(
     IconLoader iconLoader) : ViewModelBase
 {
     public event Action? Locked;
+    public event Action? DuplicatesRequested;
 
     /// <summary>Raised when the view should ask the user for a name. Returns null if cancelled.</summary>
     public Func<string, string, string?, Task<string?>>? PromptForName { get; set; }
@@ -308,6 +309,9 @@ public sealed partial class VaultViewModel(
     }
 
     // ── misc ─────────────────────────────────────────────────────────────────────────────────
+
+    [RelayCommand]
+    private void OpenDuplicates() => DuplicatesRequested?.Invoke();
 
     [RelayCommand]
     private void ClearFolder() => SelectedFolder = null;

@@ -170,9 +170,38 @@ a path; results are cached on disk for a month, misses included, so a domain is 
 and the cache filenames are hashed so the directory is not itself a readable list. Set
 `AddBitwardenIcons(o => o.Enabled = false)` and nothing leaves the machine.
 
+### Duplicate queue and merge editor
+
+The **Duplicates** button opens a queue of every group the scanner found, each showing the merge
+it proposes. It splits them by whether they need you:
+
+- **Routine** — mergeable, and the members already agree on username and password, so every
+  decision is cosmetic: which name, which folder, which URIs. One click each, or approve the lot.
+- **Needs a decision** — a real credential conflict, or a blocking warning. These open the editor.
+
+That split is not arbitrary. On the vault this was built against, **the password differs in zero
+of the mergeable groups** — it cannot differ, because same-site and same-brand grouping both
+require identical credentials. The dangerous decision only exists in the handful of
+`CredentialConflict` groups, so routing everything else through a three-pane editor would be
+ceremony.
+
+The editor is three panes: the members on the left, one of them compared in the middle, and the
+resolved result on the right. The left is a rail rather than a single pane because a real vault
+has groups of three to five members and a strict two-pane layout has nowhere to put the rest; for
+a two-member group it reads as a plain side-by-side.
+
+Scalars take a value from either side or one you type. Collections — URIs, custom fields — are
+unioned with per-element checkboxes, because "additive" only means something for a collection:
+you cannot have two usernames. Identical rows are hidden by default, since most properties agree
+and showing them buries the ones that don't.
+
+A radio chooses what the result becomes: any member, or a brand-new item. **New item disables
+itself when any member holds an attachment** — the CLI cannot move one, so creating a third item
+and deleting the sources would destroy the file.
+
 ### Next
 
-The duplicate reviewer: left/right compare with per-property merge in either direction.
+Retiring dead credentials, and an item template for API keys.
 
 ## Building
 

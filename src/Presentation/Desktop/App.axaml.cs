@@ -31,6 +31,7 @@ public partial class App : Avalonia.Application
             services.AddSingleton<MainWindowViewModel>();
             services.AddTransient<UnlockViewModel>();
             services.AddTransient<VaultViewModel>();
+            services.AddTransient<DuplicatesViewModel>();
 
             var provider = services.BuildServiceProvider();
 

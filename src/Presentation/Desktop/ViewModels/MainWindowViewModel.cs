@@ -23,12 +23,26 @@ public sealed partial class MainWindowViewModel : ViewModelBase
         _current = unlock;
     }
 
-    private void OnUnlocked()
+    private void OnUnlocked() => ShowVault();
+
+    private void ShowVault()
     {
         var vault = _services.GetRequiredService<VaultViewModel>();
         vault.Locked += OnLocked;
+        vault.DuplicatesRequested += OnDuplicatesRequested;
         Current = vault;
         _ = vault.LoadAsync();
+    }
+
+    private void OnDuplicatesRequested()
+    {
+        var duplicates = _services.GetRequiredService<DuplicatesViewModel>();
+
+        // Returning to the vault reloads it: a merge deletes items, and coming back to a stale
+        // list showing entries that no longer exist would be worse than a moment's wait.
+        duplicates.Closed += ShowVault;
+        Current = duplicates;
+        _ = duplicates.LoadAsync();
     }
 
     private void OnLocked()

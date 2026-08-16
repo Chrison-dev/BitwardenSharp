@@ -34,6 +34,12 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Website icons from Bitwarden's icon service, cached on disk, with a coloured-initial fallback.
   Off by one flag; see the README on what a lookup discloses.
 
+### Added (continued)
+- Duplicate queue and three-pane merge editor in the desktop app. The queue separates groups whose
+  decisions are cosmetic from those with a real credential conflict; the editor handles groups of
+  any size, per-property choices, per-element collection inclusion, and merging into a member or
+  a new item.
+
 ### Fixed
 - Desktop app froze on launch. Server start-up was awaited with `GetAwaiter().GetResult()` from a
   DI factory, which runs on the UI thread; the awaits inside start-up then needed the thread that
