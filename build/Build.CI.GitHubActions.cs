@@ -1,3 +1,4 @@
+using Fallout.Common;
 using Fallout.Common.CI.GitHubActions;
 
 /// <summary>
