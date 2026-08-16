@@ -140,8 +140,39 @@ Two rules the desktop host lives by, both learned the hard way:
   `PosixSignalRegistration` for SIGTERM/SIGINT/SIGHUP. `ProcessExit` alone was observed not to
   land in time.
 
-Next iteration is the duplicate reviewer: left/right compare with per-property merge in either
-direction.
+### Folders behave like a file explorer
+
+Create, rename, delete, and drag items or whole folders between nodes. Dropping on "No folder"
+unfiles items; dropping a folder on empty space moves it to the root.
+
+**Bitwarden has no folder hierarchy.** "Homelab/Proxmox" is a single folder whose *name* contains
+a slash — it is not a child of "Homelab", and "Homelab" need not exist at all. Clients render the
+implied tree; the storage is flat. Every tree operation is therefore a bulk rename: moving
+"Homelab" without rewriting "Homelab/Proxmox" would show the folder moving and its contents
+staying behind. `FolderPaths` plans the whole set of renames — deepest-first, so no two folders
+ever momentarily share a name — and refuses collisions and self-nesting before anything is
+written. Descendancy compares whole segments, so "Homelab2" is never dragged along with
+"Homelab".
+
+Deleting a folder unfiles its items rather than deleting them, and takes the subtree with it —
+otherwise "Homelab/Proxmox" would be stranded as a root folder with a slash in its name.
+
+### Website icons
+
+Items show their site's icon, falling back to a coloured initial. Bitwarden stores no icon on an
+item: clients derive one from the first URI and fetch it from a hosted service, which is why an
+item with no URI never has one anywhere.
+
+**Each lookup discloses a domain from your vault to that service**, and doing it for a whole
+vault hands over a list of the sites you hold accounts with — including private ones, where the
+hostname alone is information. Three things limit it: only the registrable domain is sent, never
+a path; results are cached on disk for a month, misses included, so a domain is asked about once;
+and the cache filenames are hashed so the directory is not itself a readable list. Set
+`AddBitwardenIcons(o => o.Enabled = false)` and nothing leaves the machine.
+
+### Next
+
+The duplicate reviewer: left/right compare with per-property merge in either direction.
 
 ## Building
 

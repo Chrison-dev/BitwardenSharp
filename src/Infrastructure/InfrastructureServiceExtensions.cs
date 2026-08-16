@@ -1,5 +1,6 @@
 using BitwardenSharp.Application.Abstractions;
 using BitwardenSharp.Infrastructure.Bw;
+using BitwardenSharp.Infrastructure.Icons;
 using BitwardenSharp.Infrastructure.Serve;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -49,6 +50,25 @@ public static class InfrastructureServiceExtensions
         services.AddSingleton<BwServeVaultClient>();
         services.AddSingleton<IVaultClient>(p => p.GetRequiredService<BwServeVaultClient>());
         services.AddSingleton<IVaultSession>(p => p.GetRequiredService<BwServeVaultClient>());
+        return services;
+    }
+
+    /// <summary>
+    /// Registers website icons from Bitwarden's icon service.
+    /// </summary>
+    /// <remarks>
+    /// Opt-in by call site rather than by default: every lookup discloses a domain from the vault
+    /// to the service. See <see cref="BitwardenIconProvider"/>.
+    /// </remarks>
+    public static IServiceCollection AddBitwardenIcons(
+        this IServiceCollection services,
+        Action<IconOptions>? configure = null)
+    {
+        var options = new IconOptions();
+        configure?.Invoke(options);
+
+        services.AddSingleton(options);
+        services.AddSingleton<IIconProvider, BitwardenIconProvider>();
         return services;
     }
 }

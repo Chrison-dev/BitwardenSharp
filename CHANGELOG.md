@@ -25,6 +25,15 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Rewritten from the pre-1.0 prototype, which returned process exit codes rather than data and had
   no domain model. That work is preserved on the `archive/v0-copilot` tag.
 
+### Added
+- Full item model: cards, identities, secure notes and SSH keys alongside logins, plus password
+  history, per-cipher `key`, `reprompt` and collection ids. Card numbers, CVVs, SSH private keys
+  and historical passwords all redact in `ToString` like login passwords already did.
+- Folder create/rename/delete and drag-and-drop of items and folders, planned through
+  `FolderPaths` so a rename carries its subtree and self-nesting is refused before any write.
+- Website icons from Bitwarden's icon service, cached on disk, with a coloured-initial fallback.
+  Off by one flag; see the README on what a lookup discloses.
+
 ### Fixed
 - Desktop app froze on launch. Server start-up was awaited with `GetAwaiter().GetResult()` from a
   DI factory, which runs on the UI thread; the awaits inside start-up then needed the thread that

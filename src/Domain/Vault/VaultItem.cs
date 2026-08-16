@@ -28,9 +28,31 @@ public sealed record VaultItem
 
     public LoginDetails? Login { get; init; }
 
+    public CardDetails? Card { get; init; }
+
+    public IdentityDetails? Identity { get; init; }
+
+    public SecureNoteDetails? SecureNote { get; init; }
+
+    public SshKeyDetails? SshKey { get; init; }
+
     public IReadOnlyList<CustomField> Fields { get; init; } = [];
 
     public IReadOnlyList<ItemAttachment> Attachments { get; init; } = [];
+
+    /// <summary>Previous passwords, newest first. Bitwarden keeps these when one is changed.</summary>
+    public IReadOnlyList<PasswordHistoryEntry> PasswordHistory { get; init; } = [];
+
+    public IReadOnlyList<string> CollectionIds { get; init; } = [];
+
+    public RepromptType Reprompt { get; init; }
+
+    /// <summary>
+    /// The item's own encryption key, present on items Bitwarden has migrated to per-cipher keys
+    /// (109 of 818 on the vault this was built against). Opaque here and carried untouched — the
+    /// CLI handles the crypto, but dropping this field on a write would corrupt the item.
+    /// </summary>
+    public string? Key { get; init; }
 
     public DateTimeOffset? RevisionDate { get; init; }
 
@@ -38,6 +60,9 @@ public sealed record VaultItem
 
     /// <summary>Every URI on this item, or empty when it has none.</summary>
     public IReadOnlyList<LoginUri> Uris => Login?.Uris ?? [];
+
+    /// <summary>Whether the master password must be re-entered before this item is revealed.</summary>
+    public bool RequiresReprompt => Reprompt == RepromptType.MasterPassword;
 
     /// <summary>
     /// How much irreplaceable data this item carries. Used to choose which member of a duplicate
@@ -53,6 +78,9 @@ public sealed record VaultItem
         + (Favorite ? 1 : 0)
         + Uris.Count;
 
-    /// <summary>Deliberately excludes <see cref="Login"/> — see <see cref="LoginDetails"/>.</summary>
+    /// <summary>
+    /// Deliberately excludes every payload — see <see cref="LoginDetails"/>, <see cref="CardDetails"/>
+    /// and <see cref="SshKeyDetails"/>, all of which redact in their own right.
+    /// </summary>
     public override string ToString() => $"VaultItem {{ Id = {Id}, Name = {Name}, Type = {Type} }}";
 }

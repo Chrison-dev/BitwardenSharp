@@ -92,6 +92,36 @@ public sealed class BwCliVaultClient(
             "Deleted item {ItemId} ({Disposition})", id, permanent ? "permanently" : "to trash");
     }
 
+    public async Task<VaultFolder> CreateFolderAsync(
+        string name, CancellationToken cancellationToken = default)
+    {
+        var payload = Convert.ToBase64String(
+            JsonSerializer.SerializeToUtf8Bytes(new BwFolder { Name = name }, Json));
+        var json = await runner.RunAsync(
+            ["create", "folder"], standardInput: payload, cancellationToken: cancellationToken);
+        return BwItemMapper.ToDomain(
+            JsonSerializer.Deserialize<BwFolder>(json, Json)
+            ?? throw new InvalidOperationException("bw create folder returned nothing"));
+    }
+
+    public async Task<VaultFolder> RenameFolderAsync(
+        string id, string name, CancellationToken cancellationToken = default)
+    {
+        var payload = Convert.ToBase64String(
+            JsonSerializer.SerializeToUtf8Bytes(new BwFolder { Id = id, Name = name }, Json));
+        var json = await runner.RunAsync(
+            ["edit", "folder", id], standardInput: payload, cancellationToken: cancellationToken);
+        return BwItemMapper.ToDomain(
+            JsonSerializer.Deserialize<BwFolder>(json, Json)
+            ?? throw new InvalidOperationException($"bw edit folder {id} returned nothing"));
+    }
+
+    public async Task DeleteFolderAsync(string id, CancellationToken cancellationToken = default)
+    {
+        await runner.RunAsync(["delete", "folder", id], cancellationToken: cancellationToken);
+        logger?.LogInformation("Deleted folder {FolderId}", id);
+    }
+
     private async Task<BwItem> GetWireItemAsync(string id, CancellationToken cancellationToken)
     {
         var json = await runner.RunAsync(["get", "item", id], cancellationToken: cancellationToken);

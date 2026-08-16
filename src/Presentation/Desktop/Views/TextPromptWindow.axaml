@@ -1,0 +1,19 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="BitwardenSharp.Desktop.Views.TextPromptWindow"
+        Width="420" SizeToContent="Height"
+        WindowStartupLocation="CenterOwner"
+        CanResize="False"
+        ShowInTaskbar="False">
+  <StackPanel Margin="20" Spacing="14">
+    <TextBlock x:Name="PromptLabel" Opacity="0.75" TextWrapping="Wrap" />
+    <!-- Enter/Escape are handled in code-behind; this window has no view-model to bind to. -->
+    <TextBox x:Name="Input" />
+    <TextBlock x:Name="ValidationMessage" FontSize="11" IsVisible="False"
+               Foreground="{DynamicResource SystemFillColorCriticalBrush}" TextWrapping="Wrap" />
+    <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right">
+      <Button x:Name="CancelButton" Content="Cancel" />
+      <Button x:Name="OkButton" Content="OK" Classes="accent" IsDefault="True" />
+    </StackPanel>
+  </StackPanel>
+</Window>

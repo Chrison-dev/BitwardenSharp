@@ -2,6 +2,7 @@ using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
 using BitwardenSharp.Application;
+using BitwardenSharp.Desktop.Services;
 using BitwardenSharp.Desktop.ViewModels;
 using BitwardenSharp.Desktop.Views;
 using BitwardenSharp.Infrastructure;
@@ -21,6 +22,12 @@ public partial class App : Avalonia.Application
             services.AddBitwardenSharpApplication();
             // A GUI outlives every call, so the long-lived server beats process-per-call.
             services.AddBitwardenServe();
+
+            // Website icons are fetched from Bitwarden's icon service, which means each lookup
+            // discloses a domain from the vault. Regional host to match the account; flip
+            // Enabled to false and nothing leaves the machine.
+            services.AddBitwardenIcons(o => o.Enabled = true);
+            services.AddSingleton<IconLoader>();
             services.AddSingleton<MainWindowViewModel>();
             services.AddTransient<UnlockViewModel>();
             services.AddTransient<VaultViewModel>();

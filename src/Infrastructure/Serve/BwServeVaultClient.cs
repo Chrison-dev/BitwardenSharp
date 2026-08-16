@@ -176,6 +176,32 @@ public sealed class BwServeVaultClient(
 
     // ── plumbing ─────────────────────────────────────────────────────────────────────────────
 
+    public async Task<VaultFolder> CreateFolderAsync(
+        string name, CancellationToken cancellationToken = default)
+    {
+        var http = await connection.GetClientAsync(cancellationToken);
+        using var response = await http.PostAsJsonAsync(
+            "object/folder", new BwFolder { Name = name }, Json, cancellationToken);
+        return BwItemMapper.ToDomain(await ReadEnvelopeAsync<BwFolder>(response, cancellationToken));
+    }
+
+    public async Task<VaultFolder> RenameFolderAsync(
+        string id, string name, CancellationToken cancellationToken = default)
+    {
+        var http = await connection.GetClientAsync(cancellationToken);
+        using var response = await http.PutAsJsonAsync(
+            $"object/folder/{id}", new BwFolder { Id = id, Name = name }, Json, cancellationToken);
+        return BwItemMapper.ToDomain(await ReadEnvelopeAsync<BwFolder>(response, cancellationToken));
+    }
+
+    public async Task DeleteFolderAsync(string id, CancellationToken cancellationToken = default)
+    {
+        var http = await connection.GetClientAsync(cancellationToken);
+        using var response = await http.DeleteAsync($"object/folder/{id}", cancellationToken);
+        await EnsureSucceededAsync(response, cancellationToken);
+        logger?.LogInformation("Deleted folder {FolderId}", id);
+    }
+
     private async Task<BwItem> GetWireItemAsync(string id, CancellationToken cancellationToken) =>
         await GetAsync<BwItem>($"object/item/{id}", cancellationToken);
 

@@ -1,4 +1,5 @@
 using BitwardenSharp.Application.Duplicates;
+using BitwardenSharp.Application.Folders;
 using BitwardenSharp.Application.Merging;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -11,6 +12,7 @@ public static class ApplicationServiceExtensions
     {
         services.AddSingleton<DuplicateScanner>();
         services.AddSingleton<MergeExecutor>();
+        services.AddSingleton<FolderService>();
         return services;
     }
 }

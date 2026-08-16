@@ -38,6 +38,25 @@ public interface IVaultClient
     /// 30 days — the only undo a merge has.
     /// </summary>
     Task DeleteItemAsync(string id, bool permanent = false, CancellationToken cancellationToken = default);
+
+    /// <summary>Creates a folder. The name is the full path, e.g. "Homelab/Proxmox".</summary>
+    Task<VaultFolder> CreateFolderAsync(string name, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Renames a folder to the given full path.
+    /// </summary>
+    /// <remarks>
+    /// This renames one folder only. Because Bitwarden stores folders flat, a tree operation is
+    /// several of these — plan it with <see cref="Domain.Vault.FolderPaths"/> rather than calling
+    /// this directly, or descendants get left behind under the old name.
+    /// </remarks>
+    Task<VaultFolder> RenameFolderAsync(
+        string id, string name, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Deletes a folder. Items inside it are not deleted; Bitwarden unfiles them.
+    /// </summary>
+    Task DeleteFolderAsync(string id, CancellationToken cancellationToken = default);
 }
 
 /// <summary>Lock state and identity of the vault behind an <see cref="IVaultClient"/>.</summary>

@@ -22,6 +22,14 @@ public sealed class BwItem
     [JsonPropertyName("notes")] public string? Notes { get; set; }
     [JsonPropertyName("favorite")] public bool Favorite { get; set; }
     [JsonPropertyName("login")] public BwLogin? Login { get; set; }
+    [JsonPropertyName("card")] public BwCard? Card { get; set; }
+    [JsonPropertyName("identity")] public BwIdentity? Identity { get; set; }
+    [JsonPropertyName("secureNote")] public BwSecureNote? SecureNote { get; set; }
+    [JsonPropertyName("sshKey")] public BwSshKey? SshKey { get; set; }
+    [JsonPropertyName("passwordHistory")] public List<BwPasswordHistory>? PasswordHistory { get; set; }
+
+    /// <summary>Per-cipher key. Opaque, and fatal to drop on a write.</summary>
+    [JsonPropertyName("key")] public string? Key { get; set; }
     [JsonPropertyName("fields")] public List<BwField>? Fields { get; set; }
     [JsonPropertyName("attachments")] public List<BwAttachment>? Attachments { get; set; }
     [JsonPropertyName("collectionIds")] public List<string>? CollectionIds { get; set; }
@@ -73,6 +81,64 @@ public sealed class BwAttachment
     [JsonPropertyName("url")] public string? Url { get; set; }
 
     [JsonExtensionData] public Dictionary<string, object>? ExtensionData { get; set; }
+}
+
+public sealed class BwCard
+{
+    [JsonPropertyName("cardholderName")] public string? CardholderName { get; set; }
+    [JsonPropertyName("brand")] public string? Brand { get; set; }
+    [JsonPropertyName("number")] public string? Number { get; set; }
+    [JsonPropertyName("expMonth")] public string? ExpMonth { get; set; }
+    [JsonPropertyName("expYear")] public string? ExpYear { get; set; }
+    [JsonPropertyName("code")] public string? Code { get; set; }
+
+    [JsonExtensionData] public Dictionary<string, object>? ExtensionData { get; set; }
+}
+
+public sealed class BwIdentity
+{
+    [JsonPropertyName("title")] public string? Title { get; set; }
+    [JsonPropertyName("firstName")] public string? FirstName { get; set; }
+    [JsonPropertyName("middleName")] public string? MiddleName { get; set; }
+    [JsonPropertyName("lastName")] public string? LastName { get; set; }
+    [JsonPropertyName("address1")] public string? Address1 { get; set; }
+    [JsonPropertyName("address2")] public string? Address2 { get; set; }
+    [JsonPropertyName("address3")] public string? Address3 { get; set; }
+    [JsonPropertyName("city")] public string? City { get; set; }
+    [JsonPropertyName("state")] public string? State { get; set; }
+    [JsonPropertyName("postalCode")] public string? PostalCode { get; set; }
+    [JsonPropertyName("country")] public string? Country { get; set; }
+    [JsonPropertyName("company")] public string? Company { get; set; }
+    [JsonPropertyName("email")] public string? Email { get; set; }
+    [JsonPropertyName("phone")] public string? Phone { get; set; }
+    [JsonPropertyName("ssn")] public string? Ssn { get; set; }
+    [JsonPropertyName("username")] public string? Username { get; set; }
+    [JsonPropertyName("passportNumber")] public string? PassportNumber { get; set; }
+    [JsonPropertyName("licenseNumber")] public string? LicenseNumber { get; set; }
+
+    [JsonExtensionData] public Dictionary<string, object>? ExtensionData { get; set; }
+}
+
+public sealed class BwSecureNote
+{
+    [JsonPropertyName("type")] public int Type { get; set; }
+
+    [JsonExtensionData] public Dictionary<string, object>? ExtensionData { get; set; }
+}
+
+public sealed class BwSshKey
+{
+    [JsonPropertyName("privateKey")] public string? PrivateKey { get; set; }
+    [JsonPropertyName("publicKey")] public string? PublicKey { get; set; }
+    [JsonPropertyName("keyFingerprint")] public string? KeyFingerprint { get; set; }
+
+    [JsonExtensionData] public Dictionary<string, object>? ExtensionData { get; set; }
+}
+
+public sealed class BwPasswordHistory
+{
+    [JsonPropertyName("password")] public string? Password { get; set; }
+    [JsonPropertyName("lastUsedDate")] public DateTimeOffset? LastUsedDate { get; set; }
 }
 
 public sealed class BwFolder

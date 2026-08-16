@@ -17,6 +17,51 @@ internal static class BwItemMapper
         Favorite = wire.Favorite,
         RevisionDate = wire.RevisionDate,
         CreationDate = wire.CreationDate,
+        Reprompt = (RepromptType)(wire.Reprompt ?? 0),
+        CollectionIds = wire.CollectionIds ?? [],
+        Key = wire.Key,
+        PasswordHistory = wire.PasswordHistory?
+            .Select(h => new PasswordHistoryEntry { Password = h.Password, LastUsedDate = h.LastUsedDate })
+            .ToList() ?? [],
+        Card = wire.Card is null ? null : new CardDetails
+        {
+            CardholderName = wire.Card.CardholderName,
+            Brand = wire.Card.Brand,
+            Number = wire.Card.Number,
+            ExpMonth = wire.Card.ExpMonth,
+            ExpYear = wire.Card.ExpYear,
+            Code = wire.Card.Code,
+        },
+        Identity = wire.Identity is null ? null : new IdentityDetails
+        {
+            Title = wire.Identity.Title,
+            FirstName = wire.Identity.FirstName,
+            MiddleName = wire.Identity.MiddleName,
+            LastName = wire.Identity.LastName,
+            Address1 = wire.Identity.Address1,
+            Address2 = wire.Identity.Address2,
+            Address3 = wire.Identity.Address3,
+            City = wire.Identity.City,
+            State = wire.Identity.State,
+            PostalCode = wire.Identity.PostalCode,
+            Country = wire.Identity.Country,
+            Company = wire.Identity.Company,
+            Email = wire.Identity.Email,
+            Phone = wire.Identity.Phone,
+            Ssn = wire.Identity.Ssn,
+            Username = wire.Identity.Username,
+            PassportNumber = wire.Identity.PassportNumber,
+            LicenseNumber = wire.Identity.LicenseNumber,
+        },
+        SecureNote = wire.SecureNote is null
+            ? null
+            : new SecureNoteDetails { Type = (SecureNoteType)wire.SecureNote.Type },
+        SshKey = wire.SshKey is null ? null : new SshKeyDetails
+        {
+            PrivateKey = wire.SshKey.PrivateKey,
+            PublicKey = wire.SshKey.PublicKey,
+            KeyFingerprint = wire.SshKey.KeyFingerprint,
+        },
         Login = wire.Login is null ? null : new LoginDetails
         {
             Username = wire.Login.Username,
