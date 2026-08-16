@@ -1,0 +1,30 @@
+<Project>
+  <PropertyGroup>
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+  </PropertyGroup>
+
+  <ItemGroup Label="Hosting / DI">
+    <PackageVersion Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.11" />
+    <PackageVersion Include="Microsoft.Extensions.DependencyInjection"              Version="10.0.11" />
+    <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions"             Version="10.0.11" />
+  </ItemGroup>
+
+  <ItemGroup Label="Presentation (CLI)">
+    <!-- Spectre.Console.Cli trails Spectre.Console's release train; NuGet unifies the
+         transitive Spectre.Console reference upward to the pinned version below. -->
+    <PackageVersion Include="Spectre.Console"     Version="0.57.2" />
+    <PackageVersion Include="Spectre.Console.Cli" Version="0.55.0" />
+  </ItemGroup>
+
+  <ItemGroup Label="Testing">
+    <PackageVersion Include="Microsoft.NET.Test.Sdk"    Version="18.8.1" />
+    <PackageVersion Include="xunit.v3"                  Version="3.2.2" />
+    <PackageVersion Include="xunit.runner.visualstudio" Version="3.1.5" />
+    <PackageVersion Include="Shouldly"                  Version="4.3.0" />
+    <PackageVersion Include="NSubstitute"               Version="6.0.0" />
+    <!-- Core ArchUnitNET only. The TngTech.ArchUnitNET.xUnit companion still pins
+         xunit.assert 2.x, which cannot coexist with xunit v3 — see ArchRuleAssert. -->
+    <PackageVersion Include="TngTech.ArchUnitNET"       Version="0.13.3" />
+  </ItemGroup>
+
+</Project>

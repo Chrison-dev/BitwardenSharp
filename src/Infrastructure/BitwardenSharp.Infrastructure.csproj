@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <Description>Adapters for BitwardenSharp — drives the official `bw` CLI to satisfy the Application's IVaultClient port.</Description>
+    <PackageTags>bitwarden;vault;cli;password-manager</PackageTags>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Application\BitwardenSharp.Application.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" />
+  </ItemGroup>
+</Project>

@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <Description>Command-line tool for BitwardenSharp — scan a vault for duplicates and merge them.</Description>
+    <PackageTags>bitwarden;vault;cli;dotnet-tool;password-manager</PackageTags>
+    <PackAsTool>true</PackAsTool>
+    <ToolCommandName>bwsharp</ToolCommandName>
+    <AssemblyName>bwsharp</AssemblyName>
+    <RootNamespace>BitwardenSharp.Cli</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\Application\BitwardenSharp.Application.csproj" />
+    <ProjectReference Include="..\..\Infrastructure\BitwardenSharp.Infrastructure.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Spectre.Console" />
+    <PackageReference Include="Spectre.Console.Cli" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
+  </ItemGroup>
+</Project>
