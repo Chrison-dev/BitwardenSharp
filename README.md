@@ -32,10 +32,10 @@ Only the first two are ever merged, and a group in either is still refused when 
 blocking warning — an attachment (which `bw` cannot move between items) or two differing TOTP
 seeds.
 
-**A shared password is not evidence of a duplicate.** Password reuse is common enough that on a
-real vault one password can cover hundreds of unrelated accounts, so matching credentials only ever
-promote a group that some stronger signal — same domain, same brand, same family — has already
-established. Grouping on credentials alone proposes deleting live accounts.
+**A shared password is not evidence of a duplicate.** Password reuse is common enough that in a
+real vault one password can cover hundreds of unrelated accounts, so matching credentials only
+ever promote a group that some stronger signal — same domain, same brand, same family — has
+already established. Grouping on credentials alone proposes deleting live accounts.
 
 ## How a merge is safe
 

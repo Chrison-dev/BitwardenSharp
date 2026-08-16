@@ -34,7 +34,7 @@ public sealed class IconOptions
 /// <para>
 /// <b>Every lookup tells the icon service that a domain is in this vault.</b> Fetching icons for
 /// a whole vault hands over a list of the sites its owner holds accounts with — including private
-/// ones like <c>git.internal.example</c>, whose mere existence is information. Bitwarden's own
+/// self-hosted ones, whose mere existence is information. Bitwarden's own
 /// clients behave this way and expose it as a setting; so does this, via
 /// <see cref="IconOptions.Enabled"/>.
 /// </para>

@@ -52,8 +52,8 @@ public class DuplicateScannerSpecs
     }
 
     /// <summary>
-    /// Regression. Password reuse is not evidence of a duplicate: on a real vault a single
-    /// password covered hundreds of unrelated accounts. Grouping on credentials alone would have
+    /// Regression. Password reuse is not evidence of a duplicate: in a real vault one password
+    /// can cover hundreds of unrelated accounts. Grouping on credentials alone would have
     /// proposed deleting live accounts.
     /// </summary>
     [Fact]
