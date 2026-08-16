@@ -93,7 +93,7 @@ public class MergeDraftSpecs
         var draft = MergeDraft.Default(group);
 
         draft.CanTargetNewItem.ShouldBeFalse();
-        draft.NewItemBlockedReason.ShouldContain("attachment");
+        draft.NewItemBlockedReason.ShouldNotBeNull().ShouldContain("attachment");
     }
 
     [Fact]
@@ -173,7 +173,7 @@ public class MergeDraftSpecs
         // The confirmation shows that the password changes, never what it changes to.
         change.Before.ShouldNotBe("old-password");
         change.After.ShouldNotBe("new-password");
-        change.Before.ShouldAllBe(c => c == '•');
+        change.Before.ShouldNotBeNull().ShouldAllBe(c => c == '•');
     }
 
     [Fact]
