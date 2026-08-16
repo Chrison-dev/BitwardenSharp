@@ -92,6 +92,23 @@ public sealed class BwCliVaultClient(
             "Deleted item {ItemId} ({Disposition})", id, permanent ? "permanently" : "to trash");
     }
 
+    public async Task<VaultItem> CreateItemAsync(
+        VaultItem item, CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(item);
+
+        var wire = BwItemMapper.ApplyTo(item, BwItemMapper.NewWireItem(item));
+        var payload = Convert.ToBase64String(JsonSerializer.SerializeToUtf8Bytes(wire, Json));
+
+        // Piped, not passed: the payload carries the password in clear.
+        var json = await runner.RunAsync(
+            ["create", "item"], standardInput: payload, cancellationToken: cancellationToken);
+
+        return BwItemMapper.ToDomain(
+            JsonSerializer.Deserialize<BwItem>(json, Json)
+            ?? throw new InvalidOperationException("bw create item returned nothing"));
+    }
+
     public async Task<VaultFolder> CreateFolderAsync(
         string name, CancellationToken cancellationToken = default)
     {

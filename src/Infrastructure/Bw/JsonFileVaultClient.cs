@@ -56,6 +56,9 @@ public sealed class JsonFileVaultClient(string itemsPath, string? foldersPath = 
     public Task DeleteItemAsync(string id, bool permanent = false, CancellationToken cancellationToken = default) =>
         throw new NotSupportedException("this vault is a read-only file snapshot; merges need a live vault");
 
+    public Task<VaultItem> CreateItemAsync(VaultItem item, CancellationToken cancellationToken = default) =>
+        throw new NotSupportedException("this vault is a read-only file snapshot");
+
     public Task<VaultFolder> CreateFolderAsync(string name, CancellationToken cancellationToken = default) =>
         throw new NotSupportedException("this vault is a read-only file snapshot");
 

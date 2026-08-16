@@ -39,6 +39,16 @@ public interface IVaultClient
     /// </summary>
     Task DeleteItemAsync(string id, bool permanent = false, CancellationToken cancellationToken = default);
 
+    /// <summary>
+    /// Creates an item and returns it as stored, with the id the vault assigned.
+    /// </summary>
+    /// <remarks>
+    /// Used when a merge is resolved into a brand-new item rather than into one of its sources.
+    /// Note that attachments cannot be carried onto a created item — the CLI has no way to move
+    /// one — so a group holding an attachment cannot be merged this way at all.
+    /// </remarks>
+    Task<VaultItem> CreateItemAsync(VaultItem item, CancellationToken cancellationToken = default);
+
     /// <summary>Creates a folder. The name is the full path, e.g. "Homelab/Proxmox".</summary>
     Task<VaultFolder> CreateFolderAsync(string name, CancellationToken cancellationToken = default);
 

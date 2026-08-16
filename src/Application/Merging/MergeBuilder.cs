@@ -14,6 +14,83 @@ public static class MergeBuilder
 {
     internal const string NoteSeparator = "\n\n--- merged ---\n";
 
+    /// <summary>
+    /// Builds the item a resolved <see cref="MergeDraft"/> describes.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// Unlike the additive overload, this one may replace the target's own values — that is the
+    /// point of the editor. The one replacement worth special handling is the password: when a
+    /// draft displaces one, the displaced value is pushed onto
+    /// <see cref="VaultItem.PasswordHistory"/> rather than dropped.
+    /// </para>
+    /// <para>
+    /// That matters because picking the wrong side of a credential conflict is the single way this
+    /// tool can lose something irreplaceable. The losing item goes to the trash and is restorable
+    /// for 30 days; the displaced password stays on the surviving item indefinitely. Two
+    /// independent recovery paths for one irreversible decision.
+    /// </para>
+    /// </remarks>
+    public static MergeResult Build(MergeDraft draft)
+    {
+        ArgumentNullException.ThrowIfNull(draft);
+
+        var changes = new List<string>();
+        var target = draft.TargetItem;
+
+        // A new item inherits the type from the group and nothing else; there is no prior state.
+        var basis = target ?? new VaultItem
+        {
+            Id = string.Empty,
+            Type = draft.Group.Survivor.Type,
+            Name = draft.Name.Value,
+        };
+
+        var history = basis.PasswordHistory.ToList();
+        if (target is not null
+            && !string.IsNullOrEmpty(target.Login?.Password)
+            && !string.Equals(target.Login.Password, draft.Password.Value, StringComparison.Ordinal))
+        {
+            history.Insert(0, new PasswordHistoryEntry
+            {
+                Password = target.Login.Password,
+                LastUsedDate = target.Login.PasswordRevisionDate ?? target.RevisionDate,
+            });
+            changes.Add("password replaced (previous value kept in password history)");
+        }
+
+        foreach (var (field, _, _) in draft.Overwrites.Where(o => o.Field != "Password"))
+            changes.Add($"{field} replaced");
+
+        var addedUris = draft.Uris.Count - basis.Uris.Count;
+        if (addedUris > 0) changes.Add($"+{addedUris} uri(s)");
+
+        var addedFields = draft.Fields.Count - basis.Fields.Count;
+        if (addedFields > 0) changes.Add($"+{addedFields} custom field(s)");
+
+        var login = basis.Login ?? new LoginDetails();
+        var merged = basis with
+        {
+            Name = draft.Name.Value,
+            FolderId = draft.FolderId.Value,
+            Notes = string.IsNullOrWhiteSpace(draft.Notes.Value) ? null : draft.Notes.Value,
+            Favorite = draft.Favorite.Value,
+            Fields = draft.Fields,
+            PasswordHistory = history,
+            Login = basis.Type == ItemType.Login || draft.Group.Survivor.Type == ItemType.Login
+                ? login with
+                {
+                    Username = draft.Username.Value,
+                    Password = draft.Password.Value,
+                    Totp = draft.Totp.Value,
+                    Uris = draft.Uris,
+                }
+                : basis.Login,
+        };
+
+        return new MergeResult(merged, changes);
+    }
+
     public static MergeResult Build(VaultItem survivor, IReadOnlyList<VaultItem> losers)
     {
         ArgumentNullException.ThrowIfNull(survivor);

@@ -176,6 +176,17 @@ public sealed class BwServeVaultClient(
 
     // ── plumbing ─────────────────────────────────────────────────────────────────────────────
 
+    public async Task<VaultItem> CreateItemAsync(
+        VaultItem item, CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(item);
+
+        var wire = BwItemMapper.ApplyTo(item, BwItemMapper.NewWireItem(item));
+        var http = await connection.GetClientAsync(cancellationToken);
+        using var response = await http.PostAsJsonAsync("object/item", wire, Json, cancellationToken);
+        return BwItemMapper.ToDomain(await ReadEnvelopeAsync<BwItem>(response, cancellationToken));
+    }
+
     public async Task<VaultFolder> CreateFolderAsync(
         string name, CancellationToken cancellationToken = default)
     {

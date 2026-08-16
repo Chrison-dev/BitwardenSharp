@@ -93,6 +93,24 @@ internal static class BwItemMapper
     };
 
     /// <summary>
+    /// A blank wire object for an item that does not exist yet.
+    /// </summary>
+    /// <remarks>
+    /// Only the discriminators the server needs in order to accept the create; everything else is
+    /// filled by <see cref="ApplyTo"/>. No id, and no per-cipher key — both are the vault's to
+    /// assign, and sending a borrowed one would attach the new item to another item's key.
+    /// </remarks>
+    public static BwItem NewWireItem(VaultItem item) => new()
+    {
+        Type = (int)item.Type,
+        Name = item.Name,
+        Login = item.Type == ItemType.Login ? new BwLogin() : null,
+        SecureNote = item.Type == ItemType.SecureNote ? new BwSecureNote() : null,
+        Card = item.Type == ItemType.Card ? new BwCard() : null,
+        Identity = item.Type == ItemType.Identity ? new BwIdentity() : null,
+    };
+
+    /// <summary>
     /// Writes the domain item's mutable state onto the wire object it came from and returns it.
     /// </summary>
     /// <remarks>
